@@ -1,0 +1,41 @@
+/* App.css */
+body {
+  font-family: 'Comic Sans MS', sans-serif;
+  background-color: #fffbf0;
+  color: #333;
+  margin: 0;
+  padding: 0;
+  text-align: center;
+}
+
+h1 {
+  color: #ff66b3;
+  font-size: 2.5em;
+  margin-top: 20px;
+}
+
+button {
+  background-color: #ffccf9;
+  border: none;
+  border-radius: 10px;
+  color: #333;
+  padding: 10px 20px;
+  font-size: 1em;
+  cursor: pointer;
+  margin: 10px;
+  transition: background-color 0.3s;
+}
+
+button:hover {
+  background-color: #ff99d5;
+}
+
+img {
+  max-width: 90%;
+  border-radius: 15px;
+  margin: 10px 0;
+}
+
+.container {
+  padding: 20px;
+}

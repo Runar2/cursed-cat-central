@@ -18,7 +18,7 @@
 /* Image styling */
 .image {
     max-width: 90%;
-    height: 300px; /* Set the desired height */
+    height: 600px; /* Set the desired height */
     object-fit: cover; /* Maintain aspect ratio and cover the area */
     border-radius: 15px;
     margin: 10px 0;

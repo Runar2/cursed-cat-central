@@ -3,7 +3,7 @@ import './ImageLoader.css';
 
 function ImageLoader() {
     const [currentImage, setCurrentImage] = useState(null);
-    const [incomingImage, setIncomingImage] = useState(null); // preload next image
+    //const [incomingImage, setIncomingImage] = useState(null); // preload next image
     const [isSpinningOut, setIsSpinningOut] = useState(false);
     const [shouldSpin, setShouldSpin] = useState(false); // controls initial spin
     const incomingImageRef = useRef(null);

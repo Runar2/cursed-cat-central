@@ -7,9 +7,9 @@
     "postinstall": "npm install --prefix client && npm run build --prefix client"
   },
   "keywords": [],
-  "author": "",
+  "author": "Runar :-)",
   "license": "ISC",
-  "description": "",
+  "description": "This display cursed cat images",
   "dependencies": {
     "@azure/storage-blob": "^12.25.0",
     "dotenv": "^16.4.5",

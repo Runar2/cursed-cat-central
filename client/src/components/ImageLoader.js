@@ -3,9 +3,9 @@ import './ImageLoader.css';
 
 function ImageLoader() {
     const [currentImage, setCurrentImage] = useState(null);
-    //const [incomingImage, setIncomingImage] = useState(null); // preload next image
     const [isSpinningOut, setIsSpinningOut] = useState(false);
-    const [shouldSpin, setShouldSpin] = useState(false); // controls initial spin
+    const [shouldSpin, setShouldSpin] = useState(false);
+    const [isAdmin, setIsAdmin] = useState(false); // state to check admin status
     const incomingImageRef = useRef(null);
 
     // fetches and preloads the next image
@@ -25,24 +25,58 @@ function ImageLoader() {
 
     // handles the full transition when button is clicked
     const loadRandomImage = () => {
-        setIsSpinningOut(true); // trigger spin-out
-        setShouldSpin(true); // enable spin effect after button click
+        setIsSpinningOut(true);
+        setShouldSpin(true);
 
-        // after spin-out completes, switch to the incoming image
         setTimeout(() => {
-            setCurrentImage(incomingImageRef.current); // show the new image
-            setIsSpinningOut(false); // start spin-in
-            preloadNextImage(); // prepare the next image
-        }, 1000); // adjust timing to match the spin-out duration
+            setCurrentImage(incomingImageRef.current);
+            setIsSpinningOut(false);
+            preloadNextImage();
+        }, 1000);
     };
 
-    // initial image load without spin
+    // check if the user is admin on component load
     useEffect(() => {
+        const checkAdminStatus = async () => {
+            try {
+                const response = await fetch('/check-admin-status');
+                const data = await response.json();
+                setIsAdmin(data.isAdmin);
+            } catch (error) {
+                console.error('error checking admin status:', error);
+            }
+        };
+
+        checkAdminStatus();
         preloadNextImage().then(() => {
             setCurrentImage(incomingImageRef.current);
-            setShouldSpin(false); // ensure no spin on initial load
+            setShouldSpin(false);
         });
-    }, []); // run once on mount
+    }, []);
+
+    // delete the current image
+    const deleteImage = async () => {
+        try {
+            const filename = currentImage.split('/').pop();
+
+            const response = await fetch('/delete-image', {
+                method: 'DELETE',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ filename }),
+            });
+
+            if (response.ok) {
+                alert(`Image ${filename} deleted successfully!`);
+                preloadNextImage().then(() => {
+                    setCurrentImage(incomingImageRef.current);
+                });
+            } else {
+                alert('Failed to delete image');
+            }
+        } catch (error) {
+            console.error('error deleting image:', error);
+        }
+    };
 
     return (
         <div className="image-loader-container">
@@ -58,6 +92,9 @@ function ImageLoader() {
             )}
             <br />
             <button onClick={loadRandomImage} className="button">load new image</button>
+            {isAdmin && (
+                <button onClick={deleteImage} className="button">delete current image</button>
+            )}
         </div>
     );
 }

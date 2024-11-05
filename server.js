@@ -152,6 +152,26 @@ app.get('/refresh-images', (req, res, next) => {
     }
 });
 
+app.delete('/delete-image', (req, res) => {
+    if (!req.session.isAdmin) return res.status(401).send('Unauthorized');
+
+    const { filename } = req.body;
+    if (!filename) return res.status(400).send('filename is required');
+
+    try {
+        const containerClient = blobServiceClient.getContainerClient('images');
+        const blobClient = containerClient.getBlobClient(filename);
+        blobClient.delete(); // delete from Azure
+
+        const localCachePath = path.join(cacheFolder, filename); // delete from local cache
+        if (fs.existsSync(localCachePath)) fs.unlinkSync(localCachePath);
+
+        res.send(`image ${filename} deleted successfully`);
+    } catch (error) {
+        console.error('error deleting image:', error);
+        res.status(500).send('error deleting image');
+    }
+});
 // Schedule automatic caching at midnight
 cron.schedule('0 0 * * *', cacheImagesFromAzure);
 

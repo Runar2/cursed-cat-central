@@ -180,3 +180,44 @@ app.listen(port, () => {
 app.get('*', (req, res) => {
     res.sendFile(path.join(__dirname, 'client', 'build', 'index.html'));
 });
+
+
+import React, { useEffect, useRef, useState } from 'react';
+import './ImageLoader.css'; // Import the CSS file
+
+const ImageLoader = () => {
+    const [currentImage, setCurrentImage] = useState(null);
+    const [isSpinningOut, setIsSpinningOut] = useState(false);
+    const incomingImageRef = useRef(null);
+
+    const preloadNextImage = async () => {
+        // Your image preloading logic here
+    };
+
+    const loadRandomImage = () => {
+        // Your image loading logic here
+    };
+
+    useEffect(() => {
+        preloadNextImage().then(() => setCurrentImage(incomingImageRef.current));
+    }, []); // empty dependency array ensures it only runs once on mount
+
+    return (
+        <div className="image-loader-container">
+            <h1>random image loader nya~ :3</h1>
+            {currentImage ? (
+                <img
+                    src={currentImage}
+                    alt="random from cursed cat central"
+                    className={`image ${isSpinningOut ? 'spin-out' : 'spin-in'}`}
+                />
+            ) : (
+                <p>loading image...</p>
+            )}
+            <br />
+            <button onClick={loadRandomImage} className="button">load new image</button>
+        </div>
+    );
+}
+
+export default ImageLoader;

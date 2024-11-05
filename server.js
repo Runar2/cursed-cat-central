@@ -10,7 +10,6 @@ const multer = require('multer');
 const app = express();
 const port = process.env.PORT || 8080;
 
-
 // Directory for cached images
 const cacheFolder = path.join(__dirname, 'cached_images');
 
@@ -25,7 +24,7 @@ const accountKey = process.env.AZURE_STORAGE_ACCOUNT_KEY;
 const connectionString = `DefaultEndpointsProtocol=https;AccountName=${accountName};AccountKey=${accountKey};EndpointSuffix=core.windows.net`;
 const blobServiceClient = BlobServiceClient.fromConnectionString(connectionString);
 
-// helper to get a list of local cached images
+// Helper to get a list of local cached images
 function getLocalImages() {
     return new Promise((resolve, reject) => {
         fs.readdir(cacheFolder, (err, files) => {
@@ -42,41 +41,24 @@ async function cacheImagesFromAzure() {
     try {
         const containerClient = blobServiceClient.getContainerClient('images');
         
-        // retrieve list of existing local files
+        // Retrieve list of existing local files
         const localFiles = await getLocalImages();
         
         for await (const blob of containerClient.listBlobsFlat()) {
             const blobName = blob.name;
             
-            // check if this blob already exists locally
+            // Check if this blob already exists locally
             if (!localFiles.includes(blobName)) {
                 console.log(`Caching new image: ${blobName}`);
                 const blobClient = containerClient.getBlobClient(blobName);
                 const downloadBlockBlobResponse = await blobClient.download(0);
                 const filePath = path.join(cacheFolder, blobName);
-
-                // download and save the new file
-                const writableStream = fs.createWriteStream(filePath);
-                await new Promise((resolve, reject) => {
-                    downloadBlockBlobResponse.readableStreamBody
-                        .pipe(writableStream)
-                        .on('finish', () => {
-                            console.log(`Successfully cached: ${blobName}`);
-                            resolve();
-                        })
-                        .on('error', (err) => {
-                            console.error(`Error caching ${blobName}:`, err);
-                            reject(err);
-                        });
-                });
-            } else {
-                console.log(`Image ${blobName} already cached locally`);
+                const writable = fs.createWriteStream(filePath);
+                downloadBlockBlobResponse.readableStreamBody.pipe(writable);
             }
         }
-
-        console.log('Selective image cache from Azure completed successfully.');
     } catch (error) {
-        console.error('Error during selective caching from Azure:', error);
+        console.error('Error caching images from Azure:', error);
     }
 }
 
@@ -100,7 +82,7 @@ app.post('/login', (req, res) => {
     console.log('Login route hit with:', req.body);
     const { username, password } = req.body;
 
-    if (username === process.env.ADMIN_USERNAME && password === process.env.ADMIN_PASSWORD) {
+    if (username === 'runar' && password === 'Katt1234') {
         req.session.isAdmin = true;
         res.sendStatus(200);
     } else {
@@ -112,7 +94,13 @@ app.post('/login', (req, res) => {
 const upload = multer({ dest: 'uploads/' });
 
 // Route to upload images to Azure Blob Storage
-app.post('/upload', isAuthenticated, upload.single('image'), async (req, res) => {
+app.post('/upload', (req, res, next) => {
+    if (req.session.isAdmin) {
+        next();
+    } else {
+        res.status(401).send('Unauthorized');
+    }
+}, upload.single('image'), async (req, res) => {
     console.log('Upload route hit with:', req.file);
     if (!req.file) {
         return res.status(400).send('No image uploaded');
@@ -144,8 +132,14 @@ app.get('/local-images', (req, res) => {
     });
 });
 
-// Route to manually refresh the cache with logging and admin credentials
-app.get('/refresh-images', isAuthenticated, async (req, res) => {
+// Route to manually refresh the cache with logging
+app.get('/refresh-images', (req, res, next) => {
+    if (req.session.isAdmin) {
+        next();
+    } else {
+        res.status(401).send('Unauthorized');
+    }
+}, async (req, res) => {
     console.log('Manual cache refresh requested at /refresh-images');
     try {
         await cacheImagesFromAzure();
@@ -157,8 +151,7 @@ app.get('/refresh-images', isAuthenticated, async (req, res) => {
 });
 
 // Schedule automatic caching at midnight
-cron.schedule('0 0 * * *', cacheImagesFromAzure); 
-
+cron.schedule('0 0 * * *', cacheImagesFromAzure);
 
 // Test route to check server status
 app.get('/test', (req, res) => {
@@ -171,15 +164,7 @@ app.listen(port, () => {
     console.log(`Server is running on http://localhost:${port}`);
 });
 
-const isAuthenticated = (req, res, next) => {
-    if (req.session.isAdmin) {
-        next();
-    } else {
-        res.status(401).send('Unauthorized');
-    }
-};
-
-// catch-all route to serve React for any unknown routes
+// Catch-all route to serve React for any unknown routes
 app.get('*', (req, res) => {
     res.sendFile(path.join(__dirname, 'client', 'build', 'index.html'));
 });

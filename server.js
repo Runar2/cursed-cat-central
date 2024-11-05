@@ -6,6 +6,8 @@ const path = require('path');
 const { BlobServiceClient } = require('@azure/storage-blob');
 require('dotenv').config();
 const multer = require('multer');
+const adminUsername = process.env.ADMIN_USERNAME;
+const adminPassword = process.env.ADMIN_PASSWORD;
 
 const app = express();
 const port = process.env.PORT || 8080;
@@ -98,16 +100,15 @@ app.use(express.static(path.join(__dirname, 'client', 'build')));
 
 
 
-// Login route with hardcoded credentials
 app.post('/login', (req, res) => {
-    console.log('Login route hit with:', req.body);
     const { username, password } = req.body;
 
-    if (username === 'admin' && password === 'password123') {
+    // validate using environment variables
+    if (username === adminUsername && password === adminPassword) {
         req.session.isAdmin = true;
-        res.sendStatus(200);
+        res.send('login successful');
     } else {
-        res.sendStatus(401);
+        res.status(401).send('invalid credentials');
     }
 });
 

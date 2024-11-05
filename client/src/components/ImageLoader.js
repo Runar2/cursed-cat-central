@@ -1,16 +1,15 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import './ImageLoader.css';
 
-function ImageLoader() {
+const ImageLoader = () => {
     const [currentImage, setCurrentImage] = useState(null);
-    //const [incomingImage, setIncomingImage] = useState(null); // preload next image
     const [isSpinningOut, setIsSpinningOut] = useState(false);
+    const [isInitialLoad, setIsInitialLoad] = useState(true);
     const incomingImageRef = useRef(null);
 
-    // fetches and preloads the next image
     const preloadNextImage = async () => {
         try {
-            const response = await fetch('/local-images');
+            const response = await fetch('YOUR_IMAGE_API_ENDPOINT');
             if (response.ok) {
                 const newImageUrl = response.url + '?' + new Date().getTime();
                 incomingImageRef.current = newImageUrl;
@@ -22,22 +21,22 @@ function ImageLoader() {
         }
     };
 
-    // handles the full transition
     const loadRandomImage = () => {
-        setIsSpinningOut(true); // trigger spin-out
+        setIsSpinningOut(true);
 
-        // after spin-out completes, switch to the incoming image
         setTimeout(() => {
-            setCurrentImage(incomingImageRef.current); // show the new image
-            setIsSpinningOut(false); // start spin-in
-            preloadNextImage(); // prepare the next image
-        }, 1000); // adjust timing to match the spin-out duration
+            setCurrentImage(incomingImageRef.current);
+            setIsSpinningOut(false);
+            preloadNextImage();
+        }, 1000);
     };
 
-    // initial image load
     useEffect(() => {
-        preloadNextImage().then(() => setCurrentImage(incomingImageRef.current));
-    }, []); // empty dependency array ensures it only runs once on mount
+        preloadNextImage().then(() => {
+            setCurrentImage(incomingImageRef.current);
+            setIsInitialLoad(false);
+        });
+    }, []);
 
     return (
         <div className="image-loader-container">
@@ -46,7 +45,7 @@ function ImageLoader() {
                 <img
                     src={currentImage}
                     alt="random from cursed cat central"
-                    className={`image ${isSpinningOut ? 'spin-out' : 'spin-in'}`}
+                    className={`image ${isInitialLoad ? '' : isSpinningOut ? 'spin-out' : 'spin-in'}`}
                 />
             ) : (
                 <p>loading image...</p>

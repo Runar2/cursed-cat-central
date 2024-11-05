@@ -64,9 +64,9 @@
 
 /* apply animations separately */
 .spin-out {
-    animation: spinOut 1s forwards;
+    animation: spinOut 1.5s forwards;
 }
 
 .spin-in {
-    animation: spinIn 1s forwards;
+    animation: spinIn 1.5s forwards;
 }

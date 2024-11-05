@@ -1,24 +1,24 @@
 /* App.css */
 body {
   font-family: 'Comic Sans MS', sans-serif;
-  background-color: #fffbf0;
-  color: #333;
+  background-color: #000; /* Black background */
+  color: #ff69b4; /* Pink text */
   margin: 0;
   padding: 0;
   text-align: center;
 }
 
 h1 {
-  color: #ff66b3;
+  color: #ff69b4; /* Pink text */
   font-size: 2.5em;
   margin-top: 20px;
 }
 
 button {
-  background-color: #ffccf9;
+  background-color: #ff69b4; /* Pink background */
   border: none;
   border-radius: 10px;
-  color: #333;
+  color: #000; /* Black text */
   padding: 10px 20px;
   font-size: 1em;
   cursor: pointer;
@@ -27,15 +27,57 @@ button {
 }
 
 button:hover {
-  background-color: #ff99d5;
+  background-color: #ff1493; /* Darker pink on hover */
 }
 
 img {
   max-width: 90%;
+  height: 300px; /* Set the desired height */
+  object-fit: cover; /* Maintain aspect ratio and cover the area */
   border-radius: 15px;
   margin: 10px 0;
+  box-shadow: 0 4px 8px rgba(255, 255, 0, 0.2); /* Yellow shadow */
 }
 
 .container {
   padding: 20px;
+}
+
+/* Additional styling for other elements */
+.image-loader-container {
+  background-color: #000; /* Black background */
+  color: #ff69b4; /* Pink text */
+  text-align: center;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(255, 255, 0, 0.2); /* Yellow shadow */
+}
+
+/* Spin-out animation */
+@keyframes spinOut {
+  0% {
+    transform: rotate(0deg) scale(1);
+  }
+  100% {
+    transform: rotate(1080deg) scale(0);
+  }
+}
+
+/* Spin-in animation */
+@keyframes spinIn {
+  0% {
+    transform: rotate(-1080deg) scale(0);
+  }
+  100% {
+    transform: rotate(0deg) scale(1);
+  }
+}
+
+/* Apply animations separately */
+.spin-out {
+  animation: spinOut 1s forwards;
+}
+
+.spin-in {
+  animation: spinIn 1s forwards;
 }

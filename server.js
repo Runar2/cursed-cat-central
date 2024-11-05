@@ -93,12 +93,8 @@ app.use(
 );
 
 // Serve React files
-app.use(express.static(path.join(__dirname, 'client/build')));
+app.use(express.static(path.join(__dirname, 'client', 'build')));
 
-// Test route
-app.get('/api/hello', (req, res) => {
-    res.send({ message: 'hello from server!' });
-});
 
 
 
@@ -179,8 +175,8 @@ app.listen(port, () => {
     console.log(`Server is running on http://localhost:${port}`);
 });
 
-// Catch-all for React app
+
+// catch-all route to serve React for any unknown routes
 app.get('*', (req, res) => {
-    console.log('Catch-all route hit');
-    res.sendFile(path.join(__dirname, 'client/build', 'index.html'));
+    res.sendFile(path.join(__dirname, 'client', 'build', 'index.html'));
 });

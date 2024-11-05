@@ -95,15 +95,12 @@ app.use(
 // Serve React files
 app.use(express.static(path.join(__dirname, 'client', 'build')));
 
-
-
-
 // Login route with hardcoded credentials
 app.post('/login', (req, res) => {
     console.log('Login route hit with:', req.body);
     const { username, password } = req.body;
 
-    if (username === 'admin' && password === 'password123') {
+    if (username === process.env.ADMIN_USERNAME && password === process.env.ADMIN_PASSWORD) {
         req.session.isAdmin = true;
         res.sendStatus(200);
     } else {
@@ -115,7 +112,7 @@ app.post('/login', (req, res) => {
 const upload = multer({ dest: 'uploads/' });
 
 // Route to upload images to Azure Blob Storage
-app.post('/upload', upload.single('image'), async (req, res) => {
+app.post('/upload', isAuthenticated, upload.single('image'), async (req, res) => {
     console.log('Upload route hit with:', req.file);
     if (!req.file) {
         return res.status(400).send('No image uploaded');
@@ -127,11 +124,10 @@ app.post('/upload', upload.single('image'), async (req, res) => {
         const blockBlobClient = containerClient.getBlockBlobClient(blobName);
 
         await blockBlobClient.uploadFile(req.file.path);
-
-        res.status(200).send('Image uploaded to Azure successfully!');
+        res.status(200).send('Image uploaded successfully');
     } catch (error) {
-        console.error('Error uploading to Azure:', error);
-        res.status(500).send('Error uploading to Azure');
+        console.error('Error uploading image:', error);
+        res.status(500).send('Error uploading image');
     }
 });
 
@@ -148,8 +144,8 @@ app.get('/local-images', (req, res) => {
     });
 });
 
-// Route to manually refresh the cache with logging
-app.get('/refresh-images', async (req, res) => {
+// Route to manually refresh the cache with logging and admin credentials
+app.get('/refresh-images', isAuthenticated, async (req, res) => {
     console.log('Manual cache refresh requested at /refresh-images');
     try {
         await cacheImagesFromAzure();
@@ -175,6 +171,13 @@ app.listen(port, () => {
     console.log(`Server is running on http://localhost:${port}`);
 });
 
+const isAuthenticated = (req, res, next) => {
+    if (req.session.isAdmin) {
+        next();
+    } else {
+        res.status(401).send('Unauthorized');
+    }
+};
 
 // catch-all route to serve React for any unknown routes
 app.get('*', (req, res) => {

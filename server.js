@@ -175,6 +175,10 @@ app.delete('/delete-image', (req, res) => {
 // Schedule automatic caching at midnight
 cron.schedule('0 0 * * *', cacheImagesFromAzure);
 
+app.get('/check-admin-status', (req, res) => {
+    res.json({ isAdmin: req.session.isAdmin || false });
+});
+
 // Test route to check server status
 app.get('/test', (req, res) => {
     console.log(`Test route hit with method: ${req.method} and URL: ${req.url}`);

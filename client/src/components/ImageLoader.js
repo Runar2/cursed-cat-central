@@ -57,9 +57,19 @@ function ImageLoader() {
     // delete the current image
     const deleteImage = async () => {
         try {
-            // clean the filename to remove any query parameters
+            // make sure we are getting the correct filename after the last "/"
             let filename = currentImage.split('/').pop();
-            filename = filename.split('?')[0]; // remove any query parameters
+    
+            // if for some reason filename is still not right, log an error and return
+            if (!filename || filename.includes('/')) {
+                console.error('Error: Filename is still incorrect:', filename);
+                return;
+            }
+    
+            // strip off any query parameters
+            filename = filename.split('?')[0];
+    
+            console.log('Filename to delete:', filename); // double-check in the logs
     
             const response = await fetch('/delete-image', {
                 method: 'DELETE',

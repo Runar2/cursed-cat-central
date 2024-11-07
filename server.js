@@ -161,12 +161,22 @@ app.delete('/delete-image', (req, res) => {
     try {
         const containerClient = blobServiceClient.getContainerClient('images');
         const blobClient = containerClient.getBlobClient(filename);
-        blobClient.delete(); // delete from Azure
 
-        const localCachePath = path.join(cacheFolder, filename); // delete from local cache
-        if (fs.existsSync(localCachePath)) fs.unlinkSync(localCachePath);
+        blobClient.delete().then(() => {
+            // delete from local cache
+            const localCachePath = path.join(cacheFolder, filename);
+            if (fs.existsSync(localCachePath)) fs.unlinkSync(localCachePath);
 
-        res.send(`image ${filename} deleted successfully`);
+            res.send(`image ${filename} deleted successfully`);
+        }).catch(error => {
+            if (error.code === 'BlobNotFound') {
+                console.warn(`Blob ${filename} not found in Azure storage.`);
+                res.status(404).send(`Blob ${filename} not found`);
+            } else {
+                console.error('error deleting image from Azure:', error);
+                res.status(500).send('error deleting image');
+            }
+        });
     } catch (error) {
         console.error('error deleting image:', error);
         res.status(500).send('error deleting image');

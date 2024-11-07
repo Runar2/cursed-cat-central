@@ -57,14 +57,16 @@ function ImageLoader() {
     // delete the current image
     const deleteImage = async () => {
         try {
-            const filename = currentImage.split('/').pop();
-
+            // clean the filename to remove any query parameters
+            let filename = currentImage.split('/').pop();
+            filename = filename.split('?')[0]; // remove any query parameters
+    
             const response = await fetch('/delete-image', {
                 method: 'DELETE',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ filename }),
             });
-
+    
             if (response.ok) {
                 alert(`Image ${filename} deleted successfully!`);
                 preloadNextImage().then(() => {

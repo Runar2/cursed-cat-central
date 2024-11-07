@@ -152,11 +152,17 @@ app.get('/refresh-images', (req, res, next) => {
     }
 });
 
+// Route to delete an image from Azure Blob Storage and local cache
 app.delete('/delete-image', (req, res) => {
     if (!req.session.isAdmin) return res.status(401).send('Unauthorized');
 
-    const { filename } = req.body;
+    let { filename } = req.body;
     if (!filename) return res.status(400).send('filename is required');
+
+    // remove any query parameters (like ?12345) from the filename
+    filename = filename.split('?')[0];
+    // extract only the filename (remove any folder path)
+    filename = path.basename(filename);
 
     try {
         const containerClient = blobServiceClient.getContainerClient('images');
@@ -182,6 +188,7 @@ app.delete('/delete-image', (req, res) => {
         res.status(500).send('error deleting image');
     }
 });
+
 // Schedule automatic caching at midnight
 cron.schedule('0 0 * * *', cacheImagesFromAzure);
 

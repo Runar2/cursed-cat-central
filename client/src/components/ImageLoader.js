@@ -92,7 +92,7 @@ function ImageLoader() {
 
     return (
         <div className="image-loader-container">
-            <h1>random image loader nya~ :3</h1>
+            <h1>Cursed Cat Central :3</h1>
             {currentImage ? (
                 <img
                     src={currentImage}

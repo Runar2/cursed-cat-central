@@ -36,11 +36,12 @@ img {
   object-fit: cover; /* Maintain aspect ratio and cover the area */
   border-radius: 15px;
   margin: 10px 0;
-  box-shadow: 0 4px 8px rgba(255, 255, 0, 0.2); /* Yellow shadow */
+  box-shadow: 0 4px 8px #e6e64d8c; /* Yellow shadow */
 }
 
 .container {
   padding: 20px;
+  color: black;
 }
 
 /* Additional styling for other elements */

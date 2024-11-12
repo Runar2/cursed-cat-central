@@ -67,12 +67,12 @@ async function cacheImagesFromAzure() {
 }
 
 // Middleware to parse JSON
-app.use(express.json());
+app.use(express.json()); //idk why this is even here
 
 // Session configuration
 app.use(
     session({
-        secret: process.env.SESSION_SECRET || "$d-@ik2e#wzai!h+&p!3=1w=ly%4(c+6%jqo2rj4(eymt2kr+&", // Replace with environment variable in production
+        secret: process.env.SESSION_SECRET, // Replace with environment variable in production
         resave: false,
         saveUninitialized: true,
     })

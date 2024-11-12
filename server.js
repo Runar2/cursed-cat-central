@@ -72,7 +72,7 @@ app.use(express.json());
 // Session configuration
 app.use(
     session({
-        secret: 'super-secret-key', // Replace with environment variable in production
+        secret: process.env.SESSION_SECRET, // Replace with environment variable in production
         resave: false,
         saveUninitialized: true,
     })

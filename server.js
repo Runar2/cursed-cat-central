@@ -72,7 +72,7 @@ app.use(express.json());
 // Session configuration
 app.use(
     session({
-        secret: process.env.SESSION_SECRET, // Replace with environment variable in production
+        secret: process.env.SESSION_SECRET || "$d-@ik2e#wzai!h+&p!3=1w=ly%4(c+6%jqo2rj4(eymt2kr+&", // Replace with environment variable in production
         resave: false,
         saveUninitialized: true,
     })
@@ -204,6 +204,8 @@ app.get('/test', (req, res) => {
 // Start the server
 app.listen(port, () => {
     console.log(`Server is running on http://localhost:${port}`);
+    console.log('Session secret:', process.env.SESSION_SECRET); // for debugging
+
 });
 
 // Catch-all route to serve React for any unknown routes

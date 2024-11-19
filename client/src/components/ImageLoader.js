@@ -57,14 +57,26 @@ function ImageLoader() {
     // delete the current image
     const deleteImage = async () => {
         try {
-            const filename = currentImage.split('/').pop();
-
+            // make sure we are getting the correct filename after the last "/"
+            let filename = currentImage.split('/').pop();
+    
+            // if for some reason filename is still not right, log an error and return
+            if (!filename || filename.includes('/')) {
+                console.error('Error: Filename is still incorrect:', filename);
+                return;
+            }
+    
+            // strip off any query parameters
+            filename = filename.split('?')[0];
+    
+            console.log('Filename to delete:', filename); // double-check in the logs
+    
             const response = await fetch('/delete-image', {
                 method: 'DELETE',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ filename }),
             });
-
+    
             if (response.ok) {
                 alert(`Image ${filename} deleted successfully!`);
                 preloadNextImage().then(() => {
@@ -80,7 +92,7 @@ function ImageLoader() {
 
     return (
         <div className="image-loader-container">
-            <h1>random image loader nya~ :3</h1>
+            <h1>Cursed Cat Central :3</h1>
             {currentImage ? (
                 <img
                     src={currentImage}

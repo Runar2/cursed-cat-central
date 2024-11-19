@@ -6,11 +6,13 @@ const path = require('path');
 const { BlobServiceClient } = require('@azure/storage-blob');
 require('dotenv').config();
 const multer = require('multer');
-//const adminPassword = process.env.ADMIN_PASSWORD;
-//const adminUserName = process.env.ADMIN_USERNAME;
+const bodyParser = require('body-parser');
 
 const app = express();
 const port = process.env.PORT || 8080;
+
+// Middleware to parse JSON bodies
+app.use(bodyParser.json());
 
 // Directory for cached images
 const cacheFolder = path.join(__dirname, 'cached_images');
@@ -65,12 +67,12 @@ async function cacheImagesFromAzure() {
 }
 
 // Middleware to parse JSON
-app.use(express.json());
+app.use(express.json()); //idk why this is even here
 
 // Session configuration
 app.use(
     session({
-        secret: 'super-secret-key', // Replace with environment variable in production
+        secret: process.env.SESSION_SECRET, // Replace with environment variable in production
         resave: false,
         saveUninitialized: true,
     })
@@ -152,28 +154,46 @@ app.get('/refresh-images', (req, res, next) => {
     }
 });
 
-app.delete('/delete-image', (req, res) => {
+// Route to delete an image from Azure Blob Storage and local cache
+app.delete('/delete-image', async (req, res) => {
     if (!req.session.isAdmin) return res.status(401).send('Unauthorized');
 
-    const { filename } = req.body;
+    let { filename } = req.body;
     if (!filename) return res.status(400).send('filename is required');
+
+    // remove any query parameters (like ?12345) from the filename
+    filename = filename.split('?')[0];
+    // extract only the filename (remove any folder path)
+    filename = path.basename(filename);
 
     try {
         const containerClient = blobServiceClient.getContainerClient('images');
         const blobClient = containerClient.getBlobClient(filename);
-        blobClient.delete(); // delete from Azure
 
-        const localCachePath = path.join(cacheFolder, filename); // delete from local cache
+        await blobClient.delete();
+
+        // delete from local cache
+        const localCachePath = path.join(cacheFolder, filename);
         if (fs.existsSync(localCachePath)) fs.unlinkSync(localCachePath);
 
         res.send(`image ${filename} deleted successfully`);
     } catch (error) {
-        console.error('error deleting image:', error);
-        res.status(500).send('error deleting image');
+        if (error.code === 'BlobNotFound') {
+            console.warn(`Blob ${filename} not found in Azure storage.`);
+            res.status(404).send(`Blob ${filename} not found`);
+        } else {
+            console.error('error deleting image from Azure:', error);
+            res.status(500).send('error deleting image');
+        }
     }
 });
+
 // Schedule automatic caching at midnight
 cron.schedule('0 0 * * *', cacheImagesFromAzure);
+
+app.get('/check-admin-status', (req, res) => {
+    res.json({ isAdmin: req.session.isAdmin || false });
+});
 
 // Test route to check server status
 app.get('/test', (req, res) => {
@@ -184,6 +204,8 @@ app.get('/test', (req, res) => {
 // Start the server
 app.listen(port, () => {
     console.log(`Server is running on http://localhost:${port}`);
+    console.log('Session secret:', process.env.SESSION_SECRET); // for debugging
+
 });
 
 // Catch-all route to serve React for any unknown routes

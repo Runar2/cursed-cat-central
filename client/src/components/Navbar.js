@@ -1,12 +1,12 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 
-function Navbar() {
+function Navbar({ isAdmin }) {
     return (
         <nav style={styles.nav}>
             <Link to="/" style={styles.link}>Home</Link>
             <Link to="/login" style={styles.link}>Login</Link>
-            <Link to="/upload" style={styles.link}>Upload</Link>
+            {isAdmin && <Link to="/upload" style={styles.link}>Upload</Link>}
         </nav>
     );
 }

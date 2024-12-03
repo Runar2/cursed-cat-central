@@ -27,11 +27,11 @@ function ImageLoader() {
     const loadRandomImage = () => {
         setIsSpinningOut(true);
         setShouldSpin(true);
-
+    
         setTimeout(() => {
-            setCurrentImage(incomingImageRef.current);
+            setCurrentImage(incomingImageRef.current); // update the current image
             setIsSpinningOut(false);
-            preloadNextImage();
+            preloadNextImage(); // preload the next image right after the update
         }, 1000);
     };
 
@@ -46,10 +46,11 @@ function ImageLoader() {
                 console.error('error checking admin status:', error);
             }
         };
-
+    
         checkAdminStatus();
         preloadNextImage().then(() => {
-            setCurrentImage(incomingImageRef.current);
+            setCurrentImage(incomingImageRef.current); // set the preloaded image
+            preloadNextImage(); // immediately queue up the next image
             setShouldSpin(false);
         });
     }, []);

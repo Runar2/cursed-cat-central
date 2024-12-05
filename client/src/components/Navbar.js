@@ -15,7 +15,7 @@ const styles = {
     nav: {
         backgroundColor: '#ff66b3',
         padding: '10px',
-        borderRadius: '10px',
+        /*borderRadius: '10px',*/
         display: 'flex',
         justifyContent: 'center',
         gap: '20px',

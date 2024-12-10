@@ -46,11 +46,14 @@ function ImageLoader() {
                 console.error('error checking admin status:', error);
             }
         };
-
+    
         checkAdminStatus();
         preloadNextImage().then(() => {
+            // set the initial image
             setCurrentImage(incomingImageRef.current);
             setShouldSpin(false);
+            // immediately preload another one so we have a new random image ready for the first click :3
+            preloadNextImage();
         });
     }, []);
 
